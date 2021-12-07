@@ -129,8 +129,6 @@ async def on_message(message):
                     
                 _ = message.content.split(" ")
 
-                print(_)
-
                 while True:
                     try:
                         for i in range(len(_)):
