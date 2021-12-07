@@ -1,8 +1,0 @@
-"~hello" for a hello message.
-"~coin" to toss a coin.
-"~dice" to roll a dice.
-"~about" to know more about the developer of this dumb bot.
-"~help" to show this message again.
-
-"~say <args>" to make the bot say stuff in place of "<args>".
-"~status <args>" to change the status of the bot to the stuff in place of "<args>".
