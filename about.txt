@@ -1,5 +1,0 @@
-This is SDB, full name, Sid's Dumb Bot.
-As expected, this bot is made by an idiot named Sid.
-Thats it...yeah...thats all about this bot.
-
-https://github.com/sid-the-loser/sdb
