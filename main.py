@@ -22,6 +22,7 @@ help_text = f'''
 "~mine" to mine for coins, getting from 0 to {propability} amount of coin.
 "~bal" to show your wallet balance.
 "~shop" to find out whats available for purchase.
+"~inv" to get inventory.
 
 "~rob <mention>" to rob people mentioned..
 "~gift <mention> <amount>" to gift other people with your money.
@@ -137,6 +138,10 @@ async def on_message(message):
             elif string.startswith("bal"):
                 await make_account(message)
                 await message.channel.send(f"{message.author.name}'s wallet has: {game_data[str(message.author.id)]['money']} coins.")
+
+            elif string.startswith("inv"):
+                await make_account(message)
+                await message.channel.send(embed=discord.Embed(title=f"{message.author.name}'s inventory", description=f"{game_data[str(message.author.id)]['inventory']}"))
 
             elif string.startswith("rob "):
                 await make_account(message)
