@@ -21,9 +21,11 @@ help_text = f'''
 
 "~mine" to mine for coins, getting from 0 to {propability} amount of coin.
 "~bal" to show your wallet balance.
+"~shop" to find out whats available for purchase.
 
 "~rob <mention>" to rob people mentioned..
 "~gift <mention> <amount>" to gift other people with your money.
+"~get <item name>" gets the item that you want from the shop.
 '''
 
 about_text = """
