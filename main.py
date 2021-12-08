@@ -2,8 +2,6 @@ import discord
 from random import gammavariate, randint, choice
 from json import load, dump
 
-from discord import embeds
-
 propability = 10
 help_text = f'''
 --Classic--
