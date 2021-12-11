@@ -24,7 +24,7 @@ help_text = f'''
 "~inv" to get inventory.
 
 "~rob <mention>" to rob people mentioned..
-"~gift <mention> <amount>" to gift other people with your money.
+"~give <mention> <amount>" to gift other people with your money.
 "~get <item name>" gets the item that you want from the shop.
 '''
 
@@ -106,6 +106,7 @@ async def stats_n_save():
 async def on_ready():
     print(f"{client.user} started session!")
     await client.change_presence(status=discord.Status.online)
+    await client.loop.create_task(stats_n_save())
 
 @client.event
 async def on_message(message):
@@ -180,7 +181,7 @@ async def on_message(message):
                 else:
                     await message.channel.send(f"{message.content.lstrip('~rob ')} is not refering to any one person!")
 
-            elif string.startswith("gift "):
+            elif string.startswith("give "):
                 await make_account(message)
                 _ = message.content.split(" ")
                 while True:
@@ -238,8 +239,6 @@ async def on_message(message):
             else:
                 await message.channel.send(embed=help_text)
 
-            print(f"{message.author}, used command {message.content}")
             log_file.write(f"{message.author}, used command {message.content}\n")
 
-client.loop.create_task(stats_n_save())
 client.run(TOKEN)
