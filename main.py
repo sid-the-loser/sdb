@@ -1,8 +1,10 @@
 import discord
 from random import gammavariate, randint, choice
 from json import load, dump
+from asyncio import sleep
 
 propability = 10
+max_propability = 50
 help_text = f'''
 --Classic--
 
@@ -13,7 +15,6 @@ help_text = f'''
 "~help" to show this message again.
 
 "~say <text to say>" to make the bot say.
-"~status <status text>" to change the status..
 
 --Game Related--
 
@@ -50,7 +51,7 @@ shop_items = {
 
 }
 
-shop_text = """
+shop_text = f"""
 --Store Items--
 
 Welcome to the store, use "~get <item name>" to buy the item of your choice.
@@ -64,7 +65,7 @@ Welcome to the store, use "~get <item name>" to buy the item of your choice.
         Cost: 100 C
 
 "Pickaxe":
-        This item gives you temporary coin boost, but pickaxes breaks tho.
+        This item gives you temporary coin boost, from {propability} to {max_propability}, but pickaxes breaks tho (1 in 10 chance).
         Cost: 1,000 C
 
 --More items coming soon!--
@@ -74,8 +75,9 @@ help_text = discord.Embed(title="Help", description=help_text)
 about_text = discord.Embed(title="About", url="https://sidtheloser.netlify.app/", description=about_text)
 shop_text = discord.Embed(title="Shop", description=shop_text)
 log_file = open("log.txt", "w").close()
-status = open("status.txt", encoding="utf-8").readline()
+log_file = open("log.txt", "a")
 game_data = load(open("game.json"))
+save_delay = 10
 
 for i in game_data:
     for j in account_details:
@@ -91,10 +93,19 @@ async def make_account(message):
         await message.channel.send(f"As you are playing this game for the first time, let me explain what you are gonna get. This is a game about mining coins and you have 1 in a {propability} chance of getting a coin. The more the coins you have, the more you can show off.")
         game_data[str(message.author.id)] = {"money": 0, "inventory": {}}
 
+async def stats_n_save():
+    global game_data, save_delay, log_file
+    while True:
+        dump(game_data, open("game.json", "w"))
+        log_file.close()
+        log_file = open("log.txt", "a")
+        await client.change_presence(activity=discord.activity.Game(f"'~help' in {len(client.guilds)} servers"))
+        await sleep(save_delay)
+
 @client.event
 async def on_ready():
     print(f"{client.user} started session!")
-    await client.change_presence(activity=discord.Game(status), status=discord.Status.online)
+    await client.change_presence(status=discord.Status.online)
 
 @client.event
 async def on_message(message):
@@ -121,17 +132,18 @@ async def on_message(message):
 
             elif string.startswith("say "):
                 await message.channel.send(message.content.lstrip("~say "))
-
-            elif string.startswith("status "):
-                await client.change_presence(activity=discord.Game(message.content.lstrip("~status ")))
-                _ = open("status.txt", "w", encoding="utf-8"); _.write(message.content.lstrip("~status ")); _.close; del _
-                await message.channel.send(f"{message.author.name} changed the status of the bot to: {message.content.lstrip('~status ')}")
             
             elif string.startswith("mine"):
                 await make_account(message)
                 _ = randint(0, propability)
+                if "pickaxe" in game_data[str(message.author.id)]["inventory"]:
+                    if game_data[str(message.author.id)]["inventory"]["pickaxe"] > 0:
+                        _ = randint(propability, max_propability)
+                        if randint(1, 10) == 1:
+                            game_data[str(message.author.id)]["inventory"]["pickaxe"] -= 1
+                            await message.channel.send(f"Woops {message.author.name}, your pickaxe broke!")
                 game_data[str(message.author.id)]["money"] += _
-                await message.channel.send(f"Congratulations, you just got {_} coins!")
+                await message.channel.send(f"Congratulations {message.author.name}, you just got {_} coins!")
 
             elif string.startswith("bal"):
                 await make_account(message)
@@ -143,7 +155,7 @@ async def on_message(message):
 
             elif string.startswith("rob "):
                 await make_account(message)
-                __ = message.content.lstrip("~rob")
+                __ = message.content.lstrip("~rob ")
                 _ = ""
                 for i in range(len(__)):
                     if __[i] != " ":
@@ -219,17 +231,15 @@ async def on_message(message):
                         game_data[str(message.author.id)]["money"] -= shop_items[_[1]]
                         await message.channel.send(f"{message.author.name} just bought {_[1]}!")
                     else:
-                        await message.channel.send("You are too poor to buy this item!")
+                        await message.channel.send(f"{message.author.name}, are too poor to buy this item!")
                 else:
-                    await message.channel.send("The item you are looking for cannot be found!")
+                    await message.channel.send(f"{message.author.name}, the item you are looking for cannot be found!")
 
             else:
                 await message.channel.send(embed=help_text)
 
             print(f"{message.author}, used command {message.content}")
-            log_file = open("log.txt", "a", encoding="utf-8")
             log_file.write(f"{message.author}, used command {message.content}\n")
-            log_file.close()
-            dump(game_data, open("game.json", "w"))
 
+client.loop.create_task(stats_n_save())
 client.run(TOKEN)
